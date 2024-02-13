@@ -4,17 +4,39 @@ import { useEffect } from "react";
 
 import "./ContactEditor.css"
 
-const ContactEditor = (contact) => {
-    console.log("INIT EDITOR: ", contact);
-    const test = useContacts();
+const ContactEditor = (props) => {
+    const contactsStore = useContacts();
+    if (!props.contact) props = {contact: {
+        name: "Name",
+        surname: "Surname",
+        patronymic: "Patronymic",
+        phones: [{id: 0, number: "+79999999999"}],
+        mails: [{id: 0, mail: "mail@mail.mail"}],
+        professions: [{id: 0, title: "Professon 1"}],
+        jobs: [{id: 0, title: "The best job"}]}
+    };
+    const contact = props.contact;
 
-    const [name, setName] = useState(contact?.name ? contact.name : "");
-    const [surname, setSurname] = useState(contact?.surname ? contact.surname : "");
-    const [patronymic, setPatronymic] = useState(contact?.patronymic ? contact.patronymic : "");
-    const [phones, setPhones] = useState(contact?.phones ? contact.phones : []);
-    const [mails, setMails] = useState(contact?.mails ? contact.mails : []);
-    const [professions, setProfessions] = useState(contact?.professions ? contact.professions : []);
-    const [jobs, setJobs] = useState(contact?.jobs ? contact.jobs : []);
+    const [name, setName] = useState("");
+    const [surname, setSurname] = useState("");
+    const [patronymic, setPatronymic] = useState("");
+    const [phones, setPhones] = useState([]);
+    const [mails, setMails] = useState([]);
+    const [professions, setProfessions] = useState([]);
+    const [jobs, setJobs] = useState([]);
+
+    useEffect(() => {
+        if (isContact_DuckTyping(contact)) {
+            setName        (contact.name        ?? "");
+            setSurname     (contact.surname     ?? "");
+            setPatronymic  (contact.patronymic  ?? "");
+            setPhones      (contact.phones      ?? []);
+            setMails       (contact.mails       ?? []);
+            setProfessions (contact.professions ?? []);
+            setJobs        (contact.jobs        ?? []);
+        }
+        console.log(contact);
+    }, []);
 
     return <div className="contact-editor">
         <form action="">
@@ -44,16 +66,19 @@ const ContactEditor = (contact) => {
 
             <label>
                 Mails:
+                {mails.map(mail => <span key={mail.id}>{mail.mail}</span>)}
                 <button>New</button>
             </label>
 
             <label>
                 Professions:
+                {professions.map(profession => <span key={profession.id}>{profession.title}</span>)}
                 <button>New</button>
             </label>
 
             <label>
                 Jobs:
+                {jobs.map(job => <span key={job.id}>{job.title}</span>)}
                 <button>New</button>
             </label>
 
@@ -69,7 +94,7 @@ const ContactEditor = (contact) => {
 
 // === event listeners =======================================================
     function newPhoneClickListener(event){
-        console.log(test.add({name: "a", surname: "b", patronymic: "c"}));
+        console.log(contactsStore.add({name: "a", surname: "b", patronymic: "c"}));
         event.preventDefault();
     }
 
@@ -87,8 +112,8 @@ function isContact_DuckTyping(contact){
         (typeof contact.name === "string") ||
         (typeof contact.surname === "string") ||
         (typeof contact.patronymic === "string") ||
-        (typeof classof.call(contact.phones) === "[object Array]") ||
-        (typeof classof.call(contact.mails) === "[object Array]") ||
-        (typeof classof.call(contact.professions) === "[object Array]") ||
-        (typeof classof.call(contact.jobs) === "[object Array]")
+        (classof.call(contact.phones) === "[object Array]") ||
+        (classof.call(contact.mails) === "[object Array]") ||
+        (classof.call(contact.professions) === "[object Array]") ||
+        (classof.call(contact.jobs) === "[object Array]")
 }

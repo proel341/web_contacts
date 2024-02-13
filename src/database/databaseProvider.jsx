@@ -44,7 +44,10 @@ const Repository = ({children}) => {
         contacts,
         add: async (contact) => await dbOpenConnect()
             .then(tx => dbfetch(tx, {method: "add", props: contact}))
-            .then(id => dispatchContacts(state => [...state])), 
+            .then(id => {
+                dispatchContacts(state => [...state])
+                return Promise.resolve(id);
+            }), 
     }
 
     return <contactsContext.Provider value={constactStoreDriver}>
@@ -140,6 +143,6 @@ export {
     useDatabase,
     useDispatchDatabase,
 
-    Repository,
+    Repository as DatabaseProvider,
     useContacts
 };
