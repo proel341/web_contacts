@@ -1,4 +1,4 @@
-import DatabaseProvider from "./database/databaseProvider";
+import { Repository, useContacts } from "./database/databaseProvider";
 import Text from "./components/text";
 import ContactEditor from "./components/ContactEditor/ContactEditor";
 
@@ -7,11 +7,16 @@ const router = {
 }
 
 const App = () => {
-    return <DatabaseProvider>
-        <h1>AA</h1>
-       <Text/>
-       <ContactEditor/>
-    </DatabaseProvider>;
+
+
+    return <Repository>
+        <ContactEditor/>
+    </Repository>
+    // return <DatabaseProvider>
+    //     <h1>AA</h1>
+    //    <Text/>
+    //    <ContactEditor/>
+    // </DatabaseProvider>;
 
 
 }

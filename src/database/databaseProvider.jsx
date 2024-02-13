@@ -6,28 +6,20 @@ import { createMailsStore } from "./IndexedDBstores/Mail";
 import { createProfessionsStore } from "./IndexedDBstores/Profession";
 import { createJobsStore } from "./IndexedDBstores/Job";
 
-import { createDatabase, createTransaction, dbfetch } from "./indexedDB";
+import { createDatabase, openConnection, dbfetch } from "./indexedDB";
+import { useEffect } from "react";
 
-const a = async () => {
-    const database = await createDatabase("Contacts", 1, (event)=>{
-        const database = event.target.result;
-        createContactsStore(database);
-        createPhonesStore(database);
-        createMailsStore(database); 
-        createProfessionsStore(database);
-        createJobsStore(database);
-    });
-
-    const tx = createTransaction(database, "Contact");
-    // const res = await dbfetch(tx, {method: "add", props: {
-    //     name: "Proel341", surname: "Tester", patronymic: "df"
-    // }})
-    const res = await dbfetch(tx, {method: "getAll"});
-    console.log(res);
-}
-a();
-
+const dbOpenConnect = () => createDatabase("Contacts", 1, (event) => {
+    const database = event.target.result;
+    createContactsStore(database);
+    createPhonesStore(database);
+    createMailsStore(database); 
+    createProfessionsStore(database);
+    createJobsStore(database);
+}).then(db => openConnection(db, "Contact"), console.log);
+    
 const contactsContext = createContext(null);
+
 const phonesContext = createContext(null);
 const mailsContext = createContext(null);
 const professionsContext = createContext(null);
@@ -36,13 +28,26 @@ const jobsContext = createContext(null);
 const reducer = (state, action) => action(state);
 
 const Repository = ({children}) => {
-    const [contacts, dispatchContacts] = useReducer(reducer, {}); 
-    const [phones, dispatchPhones] = useReducer(reducer, {});
-    const [mails, dispatchMails] = useReducer(reducer, {});
-    const [professons, dispatchProfessions] = useReducer(reducer, {});
-    const [jobs, dispatchJobs] = useReducer(reducer, {});
+    const [contacts, dispatchContacts] = useReducer(reducer, []); 
+    const [phones, dispatchPhones] = useReducer(reducer, []);
+    const [mails, dispatchMails] = useReducer(reducer, []);
+    const [professons, dispatchProfessions] = useReducer(reducer, []);
+    const [jobs, dispatchJobs] = useReducer(reducer, []);
 
-    return <contactsContext.Provider value={1}>
+    useEffect(() => {
+        dbOpenConnect()
+            .then(tx => dbfetch(tx, {method: "getAll"}))
+            .then(objects => dispatchContacts(() => objects))
+    }, []);
+
+    const constactStoreDriver = {
+        contacts,
+        add: async (contact) => await dbOpenConnect()
+            .then(tx => dbfetch(tx, {method: "add", props: contact}))
+            .then(id => dispatchContacts(state => [...state])), 
+    }
+
+    return <contactsContext.Provider value={constactStoreDriver}>
         <phonesContext.Provider value={1}>
             <mailsContext.Provider value={1}>
                 <professionsContext.Provider value={1}>
@@ -124,10 +129,17 @@ const DatabaseProvider = ({children}) => {
 const useDatabase = () => useContext(databaseContext);
 const useDispatchDatabase = () => useContext(dispatchDatabaseContext);
 
-export default DatabaseProvider;
+
+const useContacts = () => useContext(contactsContext);
+
+
+export default Repository;
 
 export {
-    DatabaseProvider,
+    //DatabaseProvider,
     useDatabase,
     useDispatchDatabase,
+
+    Repository,
+    useContacts
 };

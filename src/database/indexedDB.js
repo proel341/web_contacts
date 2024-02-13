@@ -7,7 +7,7 @@ const createDatabase = (name, version, versionbuild) => {
     });
 }
 
-const createTransaction = (database, storename, mode="readwrite") => {
+const openConnection = (database, storename, mode="readwrite") => {
     const transaction = database.transaction([storename], mode);
         transaction.onerror = (event) => console.lob(event.target.result);
         transaction.oncomplete = () => console.log("Complete"); 
@@ -25,6 +25,6 @@ const dbfetch = (request, {method, props}) => {
 
 export {
     createDatabase,
-    createTransaction,
+    openConnection,
     dbfetch
 }
