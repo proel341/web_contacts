@@ -1,10 +1,6 @@
-import { useDatabase, useDispatchDatabase } from "../database/databaseProvider";
-
 import ContactCard from "./UserCard/UserCard";
 
 const Text = () => {
-    const db = useDatabase();
-    const dbDriver = useDispatchDatabase();
     const cl = (id, name) => {
         console.log(id, name);
         dbDriver.Contact.changeName(id, name);

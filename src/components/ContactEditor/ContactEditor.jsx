@@ -1,22 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useContacts } from "../../database/databaseProvider";
-import { useEffect } from "react";
 
 import "./ContactEditor.css"
 
-const ContactEditor = (props) => {
+const ContactEditor = ({ id = 1 }) => {
     const contactsStore = useContacts();
-    if (!props.contact) props = {contact: {
-        name: "Name",
-        surname: "Surname",
-        patronymic: "Patronymic",
-        phones: [{id: 0, number: "+79999999999"}],
-        mails: [{id: 0, mail: "mail@mail.mail"}],
-        professions: [{id: 0, title: "Professon 1"}],
-        jobs: [{id: 0, title: "The best job"}]}
-    };
-    const contact = props.contact;
-
+ 
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [patronymic, setPatronymic] = useState("");
@@ -26,16 +15,19 @@ const ContactEditor = (props) => {
     const [jobs, setJobs] = useState([]);
 
     useEffect(() => {
-        if (isContact_DuckTyping(contact)) {
-            setName        (contact.name        ?? "");
-            setSurname     (contact.surname     ?? "");
-            setPatronymic  (contact.patronymic  ?? "");
-            setPhones      (contact.phones      ?? []);
-            setMails       (contact.mails       ?? []);
-            setProfessions (contact.professions ?? []);
-            setJobs        (contact.jobs        ?? []);
-        }
-        console.log(contact);
+        (async () => {
+            const contact = await contactsStore.get(id);
+            if (isContact_DuckTyping(contact)) {
+                setName        (contact.name        ?? "");
+                setSurname     (contact.surname     ?? "");
+                setPatronymic  (contact.patronymic  ?? "");
+                setPhones      (contact.phones      ?? []);
+                setMails       (contact.mails       ?? []);
+                setProfessions (contact.professions ?? []);
+                setJobs        (contact.jobs        ?? []);
+            }
+            console.log(contact);
+        })()
     }, []);
 
     return <div className="contact-editor">
@@ -82,7 +74,7 @@ const ContactEditor = (props) => {
                 <button>New</button>
             </label>
 
-            {contact ? <span>
+            {id ? <span>
                 <button>Ok</button>
                 <button>Cancel</button>
             </span>
@@ -109,11 +101,11 @@ function isContact_DuckTyping(contact){
     const classof = ({}).toString;
 
     return typeof contact === "object" && 
-        (typeof contact.name === "string") ||
-        (typeof contact.surname === "string") ||
-        (typeof contact.patronymic === "string") ||
-        (classof.call(contact.phones) === "[object Array]") ||
-        (classof.call(contact.mails) === "[object Array]") ||
-        (classof.call(contact.professions) === "[object Array]") ||
-        (classof.call(contact.jobs) === "[object Array]")
+        (typeof contact?.name === "string") ||
+        (typeof contact?.surname === "string") ||
+        (typeof contact?.patronymic === "string") ||
+        (classof.call(contact?.phones) === "[object Array]") ||
+        (classof.call(contact?.mails) === "[object Array]") ||
+        (classof.call(contact?.professions) === "[object Array]") ||
+        (classof.call(contact?.jobs) === "[object Array]")
 }

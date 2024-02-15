@@ -1,5 +1,3 @@
-import { useDispatchDatabase } from "../../database/databaseProvider";
-
 import "./UserCard.css"
 
 const ContactCard = (props) => {
