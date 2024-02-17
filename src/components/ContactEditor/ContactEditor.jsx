@@ -3,109 +3,73 @@ import { useContacts } from "../../database/databaseProvider";
 
 import "./ContactEditor.css"
 
-const ContactEditor = ({ id = 1 }) => {
-    const contactsStore = useContacts();
- 
-    const [name, setName] = useState("");
-    const [surname, setSurname] = useState("");
-    const [patronymic, setPatronymic] = useState("");
-    const [phones, setPhones] = useState([]);
-    const [mails, setMails] = useState([]);
-    const [professions, setProfessions] = useState([]);
-    const [jobs, setJobs] = useState([]);
+const a = "a";
+const ContactEditor = ({ id = null, setId = () => null}) => {
+    const repo = useContacts().repo;
+
+    const [contact, setContact] = useState({});
 
     useEffect(() => {
-        (async () => {
-            const contact = await contactsStore.get(id);
-            if (isContact_DuckTyping(contact)) {
-                setName        (contact.name        ?? "");
-                setSurname     (contact.surname     ?? "");
-                setPatronymic  (contact.patronymic  ?? "");
-                setPhones      (contact.phones      ?? []);
-                setMails       (contact.mails       ?? []);
-                setProfessions (contact.professions ?? []);
-                setJobs        (contact.jobs        ?? []);
-            }
-            console.log(contact);
-        })()
+        if (Number.isInteger(id))
+            repo.get(id).then(setContact)
     }, []);
 
     return <div className="contact-editor">
-        <form action="">
-            <label htmlFor="name">
-                Name:
-                <input type="text" name="name" id="name"
-                    value={name} onChange={inputNameListener}/>
-            </label>
+        <label htmlFor="name">
+            Name:
+            <input type="text" defaultValue={contact.fname} onChange={inputEventListener("fname")}/>
+        </label>
 
-            <label>
-                Surname:
-                <input type="text" name="surname" id="surname"
-                    value={surname} onChange={inputSurnameListener}/>
-            </label>
-            
-            <label>
-                Patronymic:
-                <input type="text" name="patronymic" id="patronymic"
-                    value={patronymic} onChange={inputPatronymicListener}/>
-            </label>
+        <label>
+            Surname:
+            <input type="text" defaultValue={contact.sname} onChange={inputEventListener("sname")}/>
+        </label>
 
-            <label>
-                Phones:
-                {phones.map(phone => <span key={phone.id}>{phone.number}</span>)}
-                <button onClick={newPhoneClickListener}>New</button>
-            </label>
+        <label>
+            Patronymic:
+            <input type="text" defaultValue={contact.pname} onChange={inputEventListener("pname")}/>
+        </label>
 
-            <label>
-                Mails:
-                {mails.map(mail => <span key={mail.id}>{mail.mail}</span>)}
-                <button>New</button>
-            </label>
+        <label>
+            Phone:
+            <input type="text" defaultValue={contact.phone} onChange={inputEventListener("phone")}/>
+        </label>
 
-            <label>
-                Professions:
-                {professions.map(profession => <span key={profession.id}>{profession.title}</span>)}
-                <button>New</button>
-            </label>
+        <label>
+            Mail:
+            <input type="text" defaultValue={contact.mail} onChange={inputEventListener("mail")}/>
+        </label>
 
-            <label>
-                Jobs:
-                {jobs.map(job => <span key={job.id}>{job.title}</span>)}
-                <button>New</button>
-            </label>
+        <label>
+            Job:
+            <input type="text" defaultValue={contact.job} onChange={inputEventListener("job")}/>
+        </label>
 
-            {id ? <span>
-                <button>Ok</button>
-                <button>Cancel</button>
-            </span>
-                : <span>
-                    <button>Create</button>
-                </span>}
-        </form> 
+        <button onClick={addEventListener}>Add</button>
+        <button onClick={cancelEventListener}>Cancel</button>
     </div>
 
-// === event listeners =======================================================
-    function newPhoneClickListener(event){
-        console.log(contactsStore.add({name: "a", surname: "b", patronymic: "c"}));
+    function addEventListener(event){
+        if (id === null)
+            repo.add(contact);
+        else
+            repo.update(id, contact);
+
+        setId(undefined);
         event.preventDefault();
     }
 
-    function inputNameListener(event) { setName(event.target.value) }
-    function inputSurnameListener(event) { setSurname(event.target.value) }
-    function inputPatronymicListener(event) { setPatronymic(event.target.value) }
+    function cancelEventListener(event){
+        setId(undefined);
+        event.preventDefault();
+    }
+
+    function inputEventListener(field){
+        return (event) => {
+           setContact({...contact, [field]: event.target.value}) 
+           event.preventDefault();
+        }
+    }
 }
 
 export default ContactEditor;
-
-function isContact_DuckTyping(contact){
-    const classof = ({}).toString;
-
-    return typeof contact === "object" && 
-        (typeof contact?.name === "string") ||
-        (typeof contact?.surname === "string") ||
-        (typeof contact?.patronymic === "string") ||
-        (classof.call(contact?.phones) === "[object Array]") ||
-        (classof.call(contact?.mails) === "[object Array]") ||
-        (classof.call(contact?.professions) === "[object Array]") ||
-        (classof.call(contact?.jobs) === "[object Array]")
-}

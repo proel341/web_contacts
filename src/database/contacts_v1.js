@@ -1,4 +1,4 @@
-import { createTable } from "../IndexedDataBase/idb";
+import { createTable } from "../IndexedDatabase/idb";
 
 const VERSION = 1;
 export const contacts = createTable(VERSION)((database) => {
